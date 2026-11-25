@@ -4,7 +4,7 @@
 
 ## 요구 사항
 - Docker (로컬 MySQL, Redis, 테스트용 Testcontainers)
-- JDK는 Gradle toolchain이 Java 21을 자동으로 받는다 (wrapper 실행용 JDK는 아무 버전이나 가능).
+- JDK는 Gradle toolchain이 Java 24를 사용한다(로컬에 없으면 자동으로 받는다) (wrapper 실행용 JDK는 아무 버전이나 가능).
 
 ## 로컬 실행
 ```bash
