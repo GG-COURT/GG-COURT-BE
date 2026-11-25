@@ -28,10 +28,15 @@
 ### 작업 흐름
 1. 메인이 작업 명세를 쓴다 (아래 형식). 명세는 서브에이전트에게 그대로 전달한다.
 2. **implementer** → 구현과 빌드 확인
-3. **tester** → 수용 기준별 테스트 작성·실행
+3. **tester** → 수용 기준별 테스트 작성 (실행은 사용자가 지시할 때만. 그 전에는 권장 실행 명령만 보고)
 4. **verifier** → 수용 기준, 컨벤션, 보안 점검 후 판정
 5. FAIL이면 verifier 보고를 implementer(또는 tester)에게 넘겨 수정 → 다시 verifier. **같은 작업이 2회 연속 FAIL이면 멈추고 사용자에게 보고**한다.
-6. PASS면 메인이 커밋하고 PROGRESS.md를 갱신한다.
+6. PASS면 메인이 커밋하고 PROGRESS.md를 갱신한다. 테스트를 실행하지 않았으면 사용자에게 권장 테스트 명령을 안내하고, PROGRESS.md 완료 표 비고에 "테스트 미실행"을 적는다.
+
+### 테스트 실행 규칙
+- **테스트는 자동으로 실행하지 않는다.** 사용자가 "테스트해" 등으로 직접 지시했을 때만 실행한다. 메인은 그 지시를 작업 명세에 `테스트 실행: 허용`으로 적어 서브에이전트에 전달한다.
+- 그 전까지는 `./gradlew build -x test`, `./gradlew compileTestJava`까지만 돌리고, 사용자에게 돌릴 테스트 명령을 권장한다.
+- 세부 규칙은 `.claude/skills/gg-test/SKILL.md` 0절.
 
 메인은 코드를 직접 대량으로 작성하지 않는다. 한두 줄 수정이나 문서 수정은 메인이 해도 된다.
 
@@ -49,7 +54,7 @@
 
 | 항목 | 버전 | 비고 |
 |---|---|---|
-| Java | 21 (Temurin 21.0.13 이상) | Gradle toolchain으로 고정 |
+| Java | 24 (Temurin 24.0.2) | Gradle toolchain으로 고정. 비LTS·지원 종료 버전 (2026-11-25 사용자 결정) |
 | Spring Boot | 4.2.0 | Spring Framework 7.x 자동 |
 | Gradle | 9.9.2 (wrapper) | Groovy DSL |
 | MySQL | 8.4.13 (LTS) | 로컬은 Docker |
@@ -63,8 +68,9 @@
 ```bash
 docker compose up -d                                        # 로컬 MySQL, Redis
 ./gradlew bootRun --args='--spring.profiles.active=local'   # 로컬 실행
-./gradlew test                                              # 테스트 (Docker 필요)
-./gradlew build                                             # 빌드 + 테스트
+./gradlew build -x test                                     # 빌드 (테스트 제외, 에이전트 기본)
+./gradlew test                                              # 테스트 (Docker 필요, 사용자 지시 시에만)
+./gradlew build                                             # 빌드 + 테스트 (사용자 지시 시에만)
 ```
 
 ## 프로젝트 구조 (기본값)
@@ -89,5 +95,6 @@ src/main/resources/
 
 ## Git
 - 브랜치: `main`, `develop`, 작업 브랜치 `feat/T-00X-설명`, `fix/...`
-- 커밋: `feat: 설명` 형식(Conventional Commits 접두어, 본문 한글). 끝에 작업 ID `(T-00X)`.
+- 커밋: **커밋 메시지를 쓰기 전에 매번 `.claude/skills/gg-commit/SKILL.md`를 읽고 따른다.** 형식은 `<gitmoji> <type>: <subject>`(프론트와 같은 gitmoji 컨벤션, 본문 한글), 끝에 작업 ID `(T-00X)`. 예: `✨ feat: 판결 등록 API 추가 (T-004)`.
+- `.githooks/commit-msg` 훅이 형식을 검사해 틀리면 커밋을 거부한다. `--no-verify`로 우회하지 않는다.
 - 커밋은 verifier PASS 후 메인이 한다. **push와 PR 생성은 사용자 확인 후.**

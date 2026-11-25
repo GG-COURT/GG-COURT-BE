@@ -1,0 +1,109 @@
+#!/usr/bin/env perl
+# GG-Court 커밋 메시지 검사 (commit-msg 훅)
+# 프론트엔드(GG-COURT-FE)의 commitlint-config-gitmoji 규칙과 같은 형식을 강제한다.
+#   <gitmoji> <type>[(scope)][!]: <subject>
+# 규칙 설명: .claude/skills/gg-commit/SKILL.md
+# 설치: ./gradlew 빌드 시 자동 (git config core.hooksPath .githooks)
+use strict;
+use warnings;
+use utf8;
+use open qw(:std :encoding(UTF-8));
+
+my $file = shift or die "commit-msg: 메시지 파일 경로가 없습니다\n";
+open(my $fh, '<:encoding(UTF-8)', $file) or die "commit-msg: $file 을 읽을 수 없습니다: $!\n";
+my @raw = <$fh>;
+close $fh;
+
+# git 주석(#)과 scissors 아래 내용 제거
+my @lines;
+for my $l (@raw) {
+    last if $l =~ /^# -+ >8 -+$/;
+    next if $l =~ /^#/;
+    $l =~ s/\r?\n\z//;
+    push @lines, $l;
+}
+shift @lines while @lines && $lines[0] =~ /^\s*$/;
+pop @lines while @lines && $lines[-1] =~ /^\s*$/;
+
+my $header = $lines[0] // '';
+
+# commitlint 기본 무시 규칙: merge, revert, fixup/squash/amend 등
+exit 0 if $header =~ /^(Merge pull request|Merge branch |Merge tag |Merge remote-tracking branch|Merged .+ (in|into) |Automatic merge|Auto-merged .+ into |[Rr]evert |(amend|fixup|squash)!)/;
+
+my @types = qw(feat fix refactor chore docs test style build ci perf revert wip);
+my %type_ok = map { $_ => 1 } @types;
+
+# gitmoji 공식 목록 (gitmojis). 이모지는 변형 선택자(U+FE0F) 유무와 상관없이 인정한다.
+my @gitmojis = (
+    [ '🎨', 'art' ], [ '⚡️', 'zap' ], [ '🔥', 'fire' ], [ '🐛', 'bug' ],
+    [ '🚑️', 'ambulance' ], [ '✨', 'sparkles' ], [ '📝', 'memo' ], [ '🚀', 'rocket' ],
+    [ '💄', 'lipstick' ], [ '🎉', 'tada' ], [ '✅', 'white_check_mark' ], [ '🔒️', 'lock' ],
+    [ '🔐', 'closed_lock_with_key' ], [ '🔖', 'bookmark' ], [ '🚨', 'rotating_light' ],
+    [ '🚧', 'construction' ], [ '💚', 'green_heart' ], [ '⬇️', 'arrow_down' ], [ '⬆️', 'arrow_up' ],
+    [ '📌', 'pushpin' ], [ '👷', 'construction_worker' ], [ '📈', 'chart_with_upwards_trend' ],
+    [ '♻️', 'recycle' ], [ '➕', 'heavy_plus_sign' ], [ '➖', 'heavy_minus_sign' ], [ '🔧', 'wrench' ],
+    [ '🔨', 'hammer' ], [ '🌐', 'globe_with_meridians' ], [ '✏️', 'pencil2' ], [ '💩', 'poop' ],
+    [ '⏪️', 'rewind' ], [ '🔀', 'twisted_rightwards_arrows' ], [ '📦️', 'package' ], [ '👽️', 'alien' ],
+    [ '🚚', 'truck' ], [ '📄', 'page_facing_up' ], [ '💥', 'boom' ], [ '🍱', 'bento' ],
+    [ '♿️', 'wheelchair' ], [ '💡', 'bulb' ], [ '🍻', 'beers' ], [ '💬', 'speech_balloon' ],
+    [ '🗃️', 'card_file_box' ], [ '🔊', 'loud_sound' ], [ '🔇', 'mute' ], [ '👥', 'busts_in_silhouette' ],
+    [ '🚸', 'children_crossing' ], [ '🏗️', 'building_construction' ], [ '📱', 'iphone' ],
+    [ '🤡', 'clown_face' ], [ '🥚', 'egg' ], [ '🙈', 'see_no_evil' ], [ '📸', 'camera_flash' ],
+    [ '⚗️', 'alembic' ], [ '🔍️', 'mag' ], [ '🏷️', 'label' ], [ '🌱', 'seedling' ],
+    [ '🚩', 'triangular_flag_on_post' ], [ '🥅', 'goal_net' ], [ '💫', 'dizzy' ], [ '🗑️', 'wastebasket' ],
+    [ '🛂', 'passport_control' ], [ '🩹', 'adhesive_bandage' ], [ '🧐', 'monocle_face' ],
+    [ '⚰️', 'coffin' ], [ '🧪', 'test_tube' ], [ '👔', 'necktie' ], [ '🩺', 'stethoscope' ],
+    [ '🧱', 'bricks' ], [ '🧑‍💻', 'technologist' ], [ '💸', 'money_with_wings' ], [ '🧵', 'thread' ],
+    [ '🦺', 'safety_vest' ], [ '✈️', 'airplane' ], [ '🦖', 't-rex' ],
+);
+my (%emoji_ok, %code_ok);
+for my $g (@gitmojis) {
+    (my $e = $g->[0]) =~ s/\x{FE0F}//g;
+    $emoji_ok{$e} = 1;
+    $code_ok{":$g->[1]:"} = 1;
+}
+
+my @errors;
+my ($moji, $rest) = $header =~ /^(\S+) (.*)$/;
+if (!defined $moji) {
+    push @errors, '헤더가 "<gitmoji> <type>: <subject>" 형식이 아닙니다.';
+} elsif ($moji =~ /^[A-Za-z]+(\([^()]*\))?!?:$/) {
+    push @errors, '맨 앞에 gitmoji가 없습니다. 예: "✨ feat: ..."';
+} else {
+    (my $norm = $moji) =~ s/\x{FE0F}//g;
+    push @errors, "\"$moji\" 은(는) gitmoji 목록에 없는 이모지입니다." unless $emoji_ok{$norm} || $code_ok{$moji};
+
+    if ($rest =~ /^([A-Za-z]*)(?:\(([^()]*)\))?!?: (.*)$/) {
+        my ($type, $scope, $subject) = ($1, $2, $3);
+        if ($type eq '') {
+            push @errors, 'type이 비어 있습니다.';
+        } elsif (!$type_ok{$type}) {
+            push @errors, "type \"$type\" 은(는) 허용되지 않습니다. 허용: @types";
+        }
+        push @errors, "scope \"$scope\" 은(는) 소문자여야 합니다." if defined $scope && $scope ne lc $scope;
+        push @errors, 'subject가 비어 있습니다.' if $subject =~ /^\s*$/;
+        push @errors, 'subject 앞뒤에 공백을 두지 않습니다.' if $subject =~ /^\s|\s$/;
+        push @errors, 'subject 끝에 마침표(.)를 붙이지 않습니다.' if $subject =~ /\.$/;
+    } else {
+        push @errors, 'gitmoji 뒤가 "<type>: <subject>" 형식이 아닙니다. (콜론 뒤 공백 한 칸 필요)';
+    }
+}
+push @errors, sprintf('헤더는 100자 이하여야 합니다. (현재 %d자)', length $header) if length($header) > 100;
+push @errors, '헤더와 본문 사이에 빈 줄이 필요합니다.' if @lines > 1 && $lines[1] !~ /^\s*$/;
+
+exit 0 unless @errors;
+
+print STDERR "\n✖ 커밋 메시지가 컨벤션에 맞지 않아 커밋하지 않았습니다.\n\n";
+print STDERR "  입력: $header\n\n";
+print STDERR "  - $_\n" for @errors;
+print STDERR <<"EOT";
+
+  형식: <gitmoji> <type>: <subject>
+  예시: ✨ feat: 판결 등록 API 추가 (T-004)
+        🐛 fix: 중복 투표 검증 누락 수정 (T-005)
+        🔧 chore: 로컬 MySQL 포트 설정 변경
+  허용 type: @types
+  규칙 전체: .claude/skills/gg-commit/SKILL.md
+
+EOT
+exit 1

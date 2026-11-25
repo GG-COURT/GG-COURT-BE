@@ -1,6 +1,6 @@
 ---
 name: gg-implement
-description: GG-Court 백엔드(Spring Boot 4.2, Java 21) 코드를 구현할 때의 절차와 코드 컨벤션. implementer 서브에이전트가 사용한다.
+description: GG-Court 백엔드(Spring Boot 4.2, Java 24) 코드를 구현할 때의 절차와 코드 컨벤션. implementer 서브에이전트가 사용한다.
 user-invocable: false
 ---
 
@@ -12,7 +12,7 @@ user-invocable: false
 1. 작업 명세, `CLAUDE.md`, `docs/PROGRESS.md`의 결정 로그, 관련 `docs/DESIGN.md` 절을 읽는다.
 2. 기존 코드에서 같은 종류의 파일(다른 도메인의 Controller, Service 등)을 찾아 패턴을 맞춘다. 처음 만드는 종류면 이 문서를 따른다.
 3. 작은 단위로 구현하고 자주 `./gradlew compileJava`로 확인한다.
-4. 끝나면 `./gradlew build -x test`가 성공하는지 확인한다. 기존 테스트가 있으면 `./gradlew test`도 돌린다.
+4. 끝나면 `./gradlew build -x test`가 성공하는지 확인한다. **테스트는 실행하지 않는다**(사용자가 지시할 때만, `gg-test` 0절). 기존 테스트가 영향을 받을 것 같으면 보고서의 "tester에게"에 적는다.
 5. 아래 형식으로 보고한다.
 
 ## 2. 패키지와 레이어
@@ -82,7 +82,7 @@ user-invocable: false
 ## 구현 보고 — T-00X
 변경 파일: (경로 목록, 새 파일은 [신규])
 구현 내용: 수용 기준 번호별로 무엇을 했는지
-빌드: 실행한 명령과 결과
+빌드: 실행한 명령과 결과 (테스트 제외)
 확인 필요: 기본값으로 정한 것, 설계와 다른 점, 미해결 사항 (없으면 "없음")
 tester에게: 테스트할 때 알아야 할 점 (테스트 데이터, 주의할 경계 조건)
 ```

@@ -1,0 +1,10 @@
+# 로컬 개발용. DB·Redis 접속 정보는 spring-boot-docker-compose가 compose.yaml(+ .env)에서 자동으로 가져온다.
+spring:
+  docker:
+    compose:
+      lifecycle-management: start-only
+  jpa:
+    show-sql: false
+logging:
+  level:
+    com.ggcourt: DEBUG

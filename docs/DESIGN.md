@@ -427,7 +427,7 @@ erDiagram
 ### 8.1 스택
 | 영역 | 기술 | 상태 |
 |---|---|---|
-| 백엔드 | Java 21, Spring Boot 4.2.0, Spring Security(OAuth2), JPA | ✅ |
+| 백엔드 | Java 24, Spring Boot 4.2.0, Spring Security(OAuth2), JPA | ✅ |
 | DB | MySQL 8.4 LTS | 💡 (PostgreSQL과 비교 후 추천) |
 | 캐시·집계 | Redis | ✅ |
 | 프론트 | React, Next.js | ✅ |

@@ -1,70 +1,28 @@
 # PROGRESS — 세션 인수인계 문서
 
 > **새 세션은 이 문서부터 읽는다.** 작업이 끝날 때마다 메인 에이전트가 갱신한다.
-> 마지막 갱신: 2026-11-25 · 초기 세팅 (작업 시작 전)
+> 마지막 갱신: 2026-11-25 · 커밋 메시지 컨벤션(gitmoji) 적용
 
 ## 1. 현재 상태 요약
-- 저장소에는 Claude Code 설정(CLAUDE.md, 서브에이전트, 스킬)과 문서만 있다. 코드는 아직 없다.
-- 첫 작업은 **T-001 환경 설정**이다.
-- 사용자 확인이 필요한 항목: 6절 "미정" 참고. T-001 진행에 막히는 항목은 없다.
+- T-001 환경 설정 완료 (verifier PASS). 빈 Spring Boot 4.2.0 프로젝트가 MySQL·Redis와 함께 뜨고 테스트 8개가 통과한다.
+- 브랜치: `main`(초기 세팅 커밋), `develop`, `feat/T-001-project-setup`(T-001 커밋). 원격 저장소 없음 → push·develop 병합은 사용자 확인 후.
+- 다음 작업은 **T-002 공통 기반**. 명세는 다음 세션 시작 시 메인이 작성한다.
+- **테스트는 사용자가 지시할 때만 실행한다** (CLAUDE.md "테스트 실행 규칙", gg-test 0절). 에이전트는 `./gradlew build -x test`까지만 돌린다.
+- Java 24로 전환했다(toolchain·CI·문서). `build -x test`만 확인, 테스트는 Java 24에서 아직 미실행.
+- 사용자 확인 필요: Java 24 전환 후 테스트 실행 여부.
 
 ## 2. 진행 중 작업
 없음
 
-## 3. 다음 작업 — T-001 환경 설정
-
-```
-[작업 ID] T-001 환경 설정
-목표: 로컬에서 앱이 MySQL·Redis와 함께 뜨고, 빌드·테스트·CI가 도는 빈 프로젝트를 만든다.
-
-범위:
- 1. 프로젝트 생성 (start.spring.io 기준)
-    - Gradle (Groovy DSL), Java 21, Spring Boot 4.2.0, Jar
-    - group: com.ggcourt / artifact: backend / 메인 클래스: GgCourtApplication
-    - 의존성: Spring Web, Spring Data JPA, Validation, Spring Security, OAuth2 Client,
-      Spring Data Redis, MySQL Driver, Flyway Migration(+ MySQL 지원 모듈), Lombok,
-      Spring Boot Actuator, Docker Compose Support, Testcontainers(MySQL)
-    - 추가: springdoc-openapi-starter-webmvc-ui 3.2.0
-    - 의존성 artifact 이름은 start.spring.io가 만든 것을 그대로 쓴다 (Boot 4에서 바뀐 모듈명 주의)
- 2. Gradle wrapper 9.9.2 고정, Java toolchain 21 설정
- 3. 로컬 인프라: compose.yaml
-    - mysql:8.4.13 (DB명 ggcourt, utf8mb4, 시간대 UTC), redis:8.10.1
-    - 접속 정보는 .env에서 읽는다. .env.example 커밋, .env는 .gitignore
- 4. 설정 파일
-    - application.yml: 공통 (open-in-view false, ddl-auto validate, jdbc time_zone UTC,
-      default_batch_fetch_size 100, Flyway 활성)
-    - application-local.yml / application-test.yml / application-prod.yml
-    - prod는 모든 접속 정보를 ${ENV}로만 참조
- 5. Flyway: src/main/resources/db/migration/V1__init.sql (빈 기준점, 주석만)
- 6. 패키지 골격: com.ggcourt.domain, com.ggcourt.global.{config,exception,security,common}
- 7. 임시 SecurityConfig: /actuator/health, /swagger-ui/**, /v3/api-docs/** 허용,
-    나머지도 일단 permitAll (TODO 주석으로 T-003에서 교체한다고 명시)
- 8. Actuator: health 엔드포인트만 노출
- 9. springdoc: Swagger UI 접속 확인. Boot 4.2에서 동작하지 않으면 멈추고 사용자에게 보고
-    (대안: Spring Boot 4.1.x로 내리기)
-10. 테스트 기반: Testcontainers(MySQL 8.4.13, Redis 8.10.1)로 컨텍스트 로딩 + DB·Redis 연결 확인 테스트 1개
-11. GitHub Actions: .github/workflows/ci.yml — PR과 develop/main push에 ./gradlew build (Temurin 21)
-12. .gitignore, .editorconfig (UTF-8, LF, 들여쓰기 4칸), README.md (로컬 실행 방법)
-
-제외: 도메인 코드, 공통 예외·응답 구조(T-002), 실제 인증(T-003), 포매터 도입(결정 대기), AWS 배포
-
-수용 기준:
- 1. `./gradlew clean build`가 성공한다 (테스트 포함).
- 2. `docker compose up -d` 후 local 프로필로 앱이 기동되고 GET /actuator/health가 {"status":"UP"}를 반환한다.
- 3. GET /swagger-ui/index.html이 200을 반환한다.
- 4. Testcontainers 테스트가 MySQL과 Redis에 실제로 연결해 통과한다.
- 5. Flyway가 기동 시 V1을 적용하고 flyway_schema_history 테이블이 생긴다.
- 6. .env가 git 추적 대상이 아니고, 저장소 어디에도 비밀번호·키가 하드코딩되어 있지 않다.
- 7. Spring Boot 관리 의존성에 버전이 직접 적혀 있지 않다 (springdoc만 예외).
- 8. ci.yml이 존재하고 Java 21로 ./gradlew build를 실행하도록 되어 있다.
-
-참고: CLAUDE.md 기술 스택 표, DESIGN.md 8장
-```
+## 3. 다음 작업 — T-002 공통 기반
+- 범위(백로그): BaseTimeEntity, ErrorCode/BusinessException/GlobalExceptionHandler, 페이지 응답 형식.
+- 응답·에러 형식은 `gg-implement` 스킬 4절 기본값으로 진행하되 프론트와 확인 필요로 결정 로그에 남긴다.
+- 명세 작성 전 참고: T-001의 테스트 기반(`TestcontainersConfiguration`, `@ActiveProfiles("test")`, RANDOM_PORT + JDK HttpClient)을 그대로 재사용한다.
 
 ## 4. 완료된 작업 (최신이 위)
 | 작업 ID | 작업 | 완료일 | 커밋 | 비고 |
 |---|---|---|---|---|
-| - | - | - | - | - |
+| T-001 | 환경 설정 (Boot 4.2.0, compose, 프로필, Flyway V1, Testcontainers, CI) | 2026-11-25 | 22168b0 | 테스트 8개. CI는 원격 저장소가 없어 실제 실행 미확인 |
 
 ## 5. 백로그 (MVP)
 | 작업 ID | 작업 | 선행 | 메모 |
@@ -94,6 +52,9 @@
 | 2026-11-12 | 스택: Spring Boot, JPA, Redis, React/Next.js, 소셜 로그인, AWS. 투표는 즉시 집계 반영 |
 | 2026-11-25 | Java 21, Spring Boot 4.2.0, Gradle 9.9.2 |
 | 2026-11-25 | 에이전트 구성: 메인 Opus 5.5, 서브(implementer·tester·verifier) Sonnet 5.5 |
+| 2026-11-25 | 테스트는 자동 실행하지 않는다. 사용자가 지시할 때만 실행하고, 그 전에는 권장 명령만 안내 |
+| 2026-11-25 | 커밋 메시지는 프론트(GG-COURT-FE)와 같은 gitmoji 형식 `<gitmoji> <type>: <subject>`. `.githooks/commit-msg`가 강제(Gradle compileJava 시 hooksPath 자동 설정), Claude는 커밋 전 `gg-commit` 스킬을 읽는다 |
+| 2026-11-25 | Java 21 → **Java 24 (Temurin 24.0.2)**. Spring Boot 4.2.0 유지(Java 24 지원). 비LTS·업데이트 종료 버전임을 알리고 사용자가 선택 |
 
 ### 기본값 적용 (사용자 확인 필요)
 | 항목 | 현재 기본값 |
@@ -105,7 +66,10 @@
 | 판결 마감 | 72시간 |
 | 대댓글 | 2단계 |
 | API 경로·응답·에러 형식 | `gg-implement` 스킬 4절 (프론트와 확인 필요) |
-| Git | develop + 기능 브랜치, Conventional Commits |
+| Git | develop + 기능 브랜치. 커밋 메시지는 gitmoji 컨벤션(확정, 위 표) |
+| Java toolchain (2026-11-25) | settings.gradle에 foojay-resolver 1.0.0 (로컬에 JDK 24가 없는 환경에서 자동 다운로드). 이 Mac은 SDKMAN의 Temurin 24.0.2 사용 |
+| 로컬 포트 (2026-11-25) | `.env.example` 기본값은 MYSQL_PORT=3306 유지. 이 Mac은 Oracle 설치본 MySQL 8.4.11(LaunchDaemon `com.oracle.oss.mysql.mysqld`)이 3306을 쓰므로 사용자가 `.env`를 MYSQL_PORT=3307로 변경. 앱은 8080 그대로 |
+| docker compose 연동 (2026-11-25) | local은 `lifecycle-management: start-only`(앱 종료 시 컨테이너 유지), test는 compose 비활성(Testcontainers 사용) |
 
 ### 미정
 - 일정, AWS 구성과 예산
@@ -115,12 +79,19 @@
 - 프론트 낙관적 업데이트
 
 ## 7. 알려진 이슈·주의사항
+- (T-001 확인) springdoc 3.2.0은 Boot 4.2.0에서 정상 동작. Boot 4 artifact 이름: `spring-boot-starter-webmvc`, `-flyway`, `-security-oauth2-client`, `testcontainers-mysql` 등.
+- start.spring.io는 `bootVersion=4.2.0`(접미사 없이)으로 요청해야 한다. `4.2.0.RELEASE`는 500.
+- `/actuator/health` 응답은 Boot 4에서 `{"groups":["liveness","readiness"],"status":"UP"}` 형태다.
 - Spring Boot 4.2.0은 2026-11-19 출시라 라이브러리 호환이 늦을 수 있다. springdoc 3.2.0은 공식적으로 Boot 4.1.2 기준이다.
 - Boot 4는 Jackson 3, Hibernate 7 기반이라 Boot 3 예제 코드의 패키지명·설정이 맞지 않을 수 있다.
 - Riot Personal 키는 공개 서비스(오픈 베타 포함)에 쓸 수 없다. 개발은 Development 키(24시간마다 재발급), 공개는 Production 키.
-- Java 21은 Temurin 21.0.13 이상. 11월 보안 업데이트가 나오면 올린다.
+- Java 24는 비LTS이고 2025-09 이후 보안 업데이트가 없다(24.0.2가 마지막). AWS 운영 배포 전에 Java 25 LTS로 올릴지 다시 검토한다.
 
 ## 8. 세션 로그 (최신이 위)
+- **2026-11-25 · 커밋 컨벤션**: FE 저장소의 commitlint-config-gitmoji 규칙을 확인해 백엔드에 perl 기반 commit-msg 훅, Gradle 자동 설치 태스크, gg-commit 스킬, CLAUDE.md 규칙 추가 / 훅 샘플 16건 확인 / 이전 커밋 5개도 사용자 요청으로 gitmoji 형식으로 메시지를 다시 씀(filter-branch, 내용 변경 없음, push 전이라 영향 없음).
+- **2026-11-25 · 로컬 포트**: 3306 점유 원인은 Mac에 직접 설치된 MySQL 8.4.11 → 사용자가 `.env` MYSQL_PORT=3307로 변경 / compose 재기동, local 프로필 기동 확인(health UP, swagger 200, JDBC 127.0.0.1:3307) / 앱은 종료, compose 컨테이너는 실행 중.
+- **2026-11-25 · 설정 변경**: 테스트 자동 실행 금지 규칙을 CLAUDE.md·스킬 3개·에이전트 3개에 반영 / Java 24 전환, `build -x test` 통과(class major 68) / 테스트는 미실행 / 사용자에게: Java 24에서 테스트 실행 권장.
+- **2026-11-25 · T-001**: git 초기화(main/develop/feat 브랜치), implementer→tester→verifier 1회 만에 PASS, 커밋 22168b0 / 다음은 T-002 명세 작성 / 사용자에게: JDK 21.0.13 설치, 로컬 MySQL 포트 충돌, push·develop 병합 여부.
 - **2026-11-25 · 초기 세팅**: CLAUDE.md, 서브에이전트 3개(implementer·tester·verifier)와 스킬, 이 문서를 만들었다. 다음 세션은 T-001부터 시작한다.
 
 <!-- 세션 로그 작성 형식
