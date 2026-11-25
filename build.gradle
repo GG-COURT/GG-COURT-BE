@@ -51,3 +51,15 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+// 커밋 메시지 검사 훅(.githooks/commit-msg) 자동 설치. 프론트의 husky `prepare`와 같은 역할.
+tasks.register('installGitHooks', Exec) {
+	description = 'git이 .githooks 디렉터리의 훅을 사용하도록 설정한다.'
+	group = 'git hooks'
+	onlyIf { file('.git').exists() }
+	commandLine 'git', 'config', 'core.hooksPath', '.githooks'
+}
+
+tasks.named('compileJava') {
+	dependsOn 'installGitHooks'
+}

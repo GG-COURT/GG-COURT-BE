@@ -1,7 +1,7 @@
 # PROGRESS — 세션 인수인계 문서
 
 > **새 세션은 이 문서부터 읽는다.** 작업이 끝날 때마다 메인 에이전트가 갱신한다.
-> 마지막 갱신: 2026-11-25 · 로컬 MySQL 포트 3307로 변경
+> 마지막 갱신: 2026-11-25 · 커밋 메시지 컨벤션(gitmoji) 적용
 
 ## 1. 현재 상태 요약
 - T-001 환경 설정 완료 (verifier PASS). 빈 Spring Boot 4.2.0 프로젝트가 MySQL·Redis와 함께 뜨고 테스트 8개가 통과한다.
@@ -53,6 +53,7 @@
 | 2026-11-25 | Java 21, Spring Boot 4.2.0, Gradle 9.9.2 |
 | 2026-11-25 | 에이전트 구성: 메인 Opus 5.5, 서브(implementer·tester·verifier) Sonnet 5.5 |
 | 2026-11-25 | 테스트는 자동 실행하지 않는다. 사용자가 지시할 때만 실행하고, 그 전에는 권장 명령만 안내 |
+| 2026-11-25 | 커밋 메시지는 프론트(GG-COURT-FE)와 같은 gitmoji 형식 `<gitmoji> <type>: <subject>`. `.githooks/commit-msg`가 강제(Gradle compileJava 시 hooksPath 자동 설정), Claude는 커밋 전 `gg-commit` 스킬을 읽는다 |
 | 2026-11-25 | Java 21 → **Java 24 (Temurin 24.0.2)**. Spring Boot 4.2.0 유지(Java 24 지원). 비LTS·업데이트 종료 버전임을 알리고 사용자가 선택 |
 
 ### 기본값 적용 (사용자 확인 필요)
@@ -65,7 +66,7 @@
 | 판결 마감 | 72시간 |
 | 대댓글 | 2단계 |
 | API 경로·응답·에러 형식 | `gg-implement` 스킬 4절 (프론트와 확인 필요) |
-| Git | develop + 기능 브랜치, Conventional Commits |
+| Git | develop + 기능 브랜치. 커밋 메시지는 gitmoji 컨벤션(확정, 위 표) |
 | Java toolchain (2026-11-25) | settings.gradle에 foojay-resolver 1.0.0 (로컬에 JDK 24가 없는 환경에서 자동 다운로드). 이 Mac은 SDKMAN의 Temurin 24.0.2 사용 |
 | 로컬 포트 (2026-11-25) | `.env.example` 기본값은 MYSQL_PORT=3306 유지. 이 Mac은 Oracle 설치본 MySQL 8.4.11(LaunchDaemon `com.oracle.oss.mysql.mysqld`)이 3306을 쓰므로 사용자가 `.env`를 MYSQL_PORT=3307로 변경. 앱은 8080 그대로 |
 | docker compose 연동 (2026-11-25) | local은 `lifecycle-management: start-only`(앱 종료 시 컨테이너 유지), test는 compose 비활성(Testcontainers 사용) |
@@ -87,6 +88,7 @@
 - Java 24는 비LTS이고 2025-09 이후 보안 업데이트가 없다(24.0.2가 마지막). AWS 운영 배포 전에 Java 25 LTS로 올릴지 다시 검토한다.
 
 ## 8. 세션 로그 (최신이 위)
+- **2026-11-25 · 커밋 컨벤션**: FE 저장소의 commitlint-config-gitmoji 규칙을 확인해 백엔드에 perl 기반 commit-msg 훅, Gradle 자동 설치 태스크, gg-commit 스킬, CLAUDE.md 규칙 추가 / 훅 샘플 16건 확인 / 이전 커밋 5개는 이 형식 이전이라 형식이 다름.
 - **2026-11-25 · 로컬 포트**: 3306 점유 원인은 Mac에 직접 설치된 MySQL 8.4.11 → 사용자가 `.env` MYSQL_PORT=3307로 변경 / compose 재기동, local 프로필 기동 확인(health UP, swagger 200, JDBC 127.0.0.1:3307) / 앱은 종료, compose 컨테이너는 실행 중.
 - **2026-11-25 · 설정 변경**: 테스트 자동 실행 금지 규칙을 CLAUDE.md·스킬 3개·에이전트 3개에 반영 / Java 24 전환, `build -x test` 통과(class major 68) / 테스트는 미실행 / 사용자에게: Java 24에서 테스트 실행 권장.
 - **2026-11-25 · T-001**: git 초기화(main/develop/feat 브랜치), implementer→tester→verifier 1회 만에 PASS, 커밋 57897bb / 다음은 T-002 명세 작성 / 사용자에게: JDK 21.0.13 설치, 로컬 MySQL 포트 충돌, push·develop 병합 여부.
