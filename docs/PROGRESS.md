@@ -1,12 +1,14 @@
 # PROGRESS — 세션 인수인계 문서
 
 > **새 세션은 이 문서부터 읽는다.** 작업이 끝날 때마다 메인 에이전트가 갱신한다.
-> 마지막 갱신: 2026-11-25 · 커밋 메시지 컨벤션(gitmoji) 적용
+> 마지막 갱신: 2026-11-25 · 원격 연결, 이슈 기반 작업 흐름 도입
 
 ## 1. 현재 상태 요약
 - T-001 환경 설정 완료 (verifier PASS). 빈 Spring Boot 4.2.0 프로젝트가 MySQL·Redis와 함께 뜨고 테스트 8개가 통과한다.
 - 브랜치: `main`(초기 세팅 커밋), `develop`, `feat/T-001-project-setup`(T-001 커밋). 원격 저장소 없음 → push·develop 병합은 사용자 확인 후.
-- 다음 작업은 **T-002 공통 기반**. 명세는 다음 세션 시작 시 메인이 작성한다.
+- 원격 `origin` = GG-COURT/GG-COURT-BE. `main`은 push 완료. `develop`은 토큰에 `workflow` 권한이 없어 push 거부됨(사용자 조치 필요).
+- **이후 작업은 GitHub 이슈 단위**: 이슈 선택 → develop 동기화 → 브랜치 → 커밋 → PR → 사용자·팀원 리뷰 후 머지(Claude는 머지 금지). CLAUDE.md "Git" 절.
+- 다음 작업은 사용자가 고르는 이슈. 백로그(5절) T-002 공통 기반이 다음 후보.
 - **테스트는 사용자가 지시할 때만 실행한다** (CLAUDE.md "테스트 실행 규칙", gg-test 0절). 에이전트는 `./gradlew build -x test`까지만 돌린다.
 - Java 24로 전환했다(toolchain·CI·문서). `build -x test`만 확인, 테스트는 Java 24에서 아직 미실행.
 - 사용자 확인 필요: Java 24 전환 후 테스트 실행 여부.
@@ -53,6 +55,7 @@
 | 2026-11-25 | Java 21, Spring Boot 4.2.0, Gradle 9.9.2 |
 | 2026-11-25 | 에이전트 구성: 메인 Opus 5.5, 서브(implementer·tester·verifier) Sonnet 5.5 |
 | 2026-11-25 | 테스트는 자동 실행하지 않는다. 사용자가 지시할 때만 실행하고, 그 전에는 권장 명령만 안내 |
+| 2026-11-25 | 작업은 GitHub 이슈 단위. 브랜치 `{type}/{이슈번호}-{설명}`, 커밋 subject 끝 `(#이슈번호)`, develop 대상 PR, 머지는 사용자·팀원만 |
 | 2026-11-25 | 커밋 메시지는 프론트(GG-COURT-FE)와 같은 gitmoji 형식 `<gitmoji> <type>: <subject>`. `.githooks/commit-msg`가 강제(Gradle compileJava 시 hooksPath 자동 설정), Claude는 커밋 전 `gg-commit` 스킬을 읽는다 |
 | 2026-11-25 | Java 21 → **Java 24 (Temurin 24.0.2)**. Spring Boot 4.2.0 유지(Java 24 지원). 비LTS·업데이트 종료 버전임을 알리고 사용자가 선택 |
 
@@ -88,6 +91,7 @@
 - Java 24는 비LTS이고 2025-09 이후 보안 업데이트가 없다(24.0.2가 마지막). AWS 운영 배포 전에 Java 25 LTS로 올릴지 다시 검토한다.
 
 ## 8. 세션 로그 (최신이 위)
+- **2026-11-25 · 원격 연결**: feat/T-001을 develop에 --no-ff 머지(099c882, 초기 세팅이라 사용자 지시로 직접 머지) / origin 연결, main push 완료, develop은 PAT `workflow` 스코프 없음으로 거부 / CLAUDE.md에 이슈 기반 흐름 반영(브랜치 docs/git-workflow) / 사용자에게: 토큰 권한, gh CLI 설치.
 - **2026-11-25 · 커밋 컨벤션**: FE 저장소의 commitlint-config-gitmoji 규칙을 확인해 백엔드에 perl 기반 commit-msg 훅, Gradle 자동 설치 태스크, gg-commit 스킬, CLAUDE.md 규칙 추가 / 훅 샘플 16건 확인 / 이전 커밋 5개도 사용자 요청으로 gitmoji 형식으로 메시지를 다시 씀(filter-branch, 내용 변경 없음, push 전이라 영향 없음).
 - **2026-11-25 · 로컬 포트**: 3306 점유 원인은 Mac에 직접 설치된 MySQL 8.4.11 → 사용자가 `.env` MYSQL_PORT=3307로 변경 / compose 재기동, local 프로필 기동 확인(health UP, swagger 200, JDBC 127.0.0.1:3307) / 앱은 종료, compose 컨테이너는 실행 중.
 - **2026-11-25 · 설정 변경**: 테스트 자동 실행 금지 규칙을 CLAUDE.md·스킬 3개·에이전트 3개에 반영 / Java 24 전환, `build -x test` 통과(class major 68) / 테스트는 미실행 / 사용자에게: Java 24에서 테스트 실행 권장.
