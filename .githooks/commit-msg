@@ -99,8 +99,8 @@ print STDERR "  - $_\n" for @errors;
 print STDERR <<"EOT";
 
   형식: <gitmoji> <type>: <subject>
-  예시: ✨ feat: 판결 등록 API 추가 (T-004)
-        🐛 fix: 중복 투표 검증 누락 수정 (T-005)
+  예시: ✨ feat: 판결 등록 API 추가 (#12)
+        🐛 fix: 중복 투표 검증 누락 수정 (#15)
         🔧 chore: 로컬 MySQL 포트 설정 변경
   허용 type: @types
   규칙 전체: .claude/skills/gg-commit/SKILL.md

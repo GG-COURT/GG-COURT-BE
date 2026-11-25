@@ -28,8 +28,8 @@ docker compose up -d                                        # MySQL 8.4.13, Redi
 ```
 <gitmoji> <type>: <subject>
 
-✨ feat: 판결 등록 API 추가 (T-004)
-🐛 fix: 중복 투표 검증 누락 수정 (T-005)
+✨ feat: 판결 등록 API 추가 (#12)
+🐛 fix: 중복 투표 검증 누락 수정 (#15)
 ```
 - 허용 type: `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `style`, `build`, `ci`, `perf`, `revert`, `wip`
 - 훅은 첫 `./gradlew` 빌드 때 자동으로 켜진다(`git config core.hooksPath .githooks`).

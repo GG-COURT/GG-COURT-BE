@@ -24,7 +24,7 @@ description: GG-Court 커밋 메시지 컨벤션(gitmoji + type). git commit을 
 - 본문이 있으면 헤더 다음 줄은 **빈 줄**.
 
 ## 2. 이 저장소의 추가 규칙
-- 작업 명세가 있는 커밋은 subject 끝에 작업 ID: `✨ feat: 판결 등록 API 추가 (T-004)`.
+- 이슈 작업의 커밋은 subject 끝에 이슈 번호: `✨ feat: 판결 등록 API 추가 (#12)`. 이슈가 없는 작업은 생략.
 - 본문은 한글. 무엇을 왜 바꿨는지 목록으로 적는다.
 - Claude가 만든 커밋은 맨 끝에 `Co-Authored-By:` 꼬리말을 붙인다(본문과 빈 줄로 구분).
 - `--no-verify`로 훅을 건너뛰지 않는다. 거부되면 메시지를 고쳐 다시 커밋한다.
@@ -60,12 +60,12 @@ description: GG-Court 커밋 메시지 컨벤션(gitmoji + type). git commit을 
 
 ## 4. 예시
 ```
-✨ feat: 판결 등록 API 추가 (T-004)
-🐛 fix(vote): 유동 중복 투표 검증 누락 수정 (T-005)
-🗃️ feat: 투표 테이블 마이그레이션 추가 (T-005)
+✨ feat: 판결 등록 API 추가 (#12)
+🐛 fix(vote): 유동 중복 투표 검증 누락 수정 (#15)
+🗃️ feat: 투표 테이블 마이그레이션 추가 (#15)
 🔧 chore: 로컬 MySQL 포트 설정 변경
-📝 docs: T-001 완료 반영 (T-001)
-✅ test: 투표 마감 경계 조건 테스트 추가 (T-012)
+📝 docs: README 로컬 실행 방법 보완 (#3)
+✅ test: 투표 마감 경계 조건 테스트 추가 (#20)
 👷 ci: PR에서 커밋 메시지 검사 추가
 ```
 틀린 예: `feat: 설명`(gitmoji 없음), `✨ feature: ...`(허용 안 된 type), `✨ feat:설명`(콜론 뒤 공백 없음), `✨ feat: 설명.`(마침표).
@@ -74,7 +74,7 @@ description: GG-Court 커밋 메시지 컨벤션(gitmoji + type). git commit을 
 이모지와 여러 줄 본문이 깨지지 않게 heredoc으로 넘긴다.
 ```bash
 git commit -F - <<'EOF'
-✨ feat: 판결 등록 API 추가 (T-004)
+✨ feat: 판결 등록 API 추가 (#12)
 
 - 판결 등록·조회 엔드포인트
 - 제목·영상 링크 검증
@@ -82,7 +82,7 @@ git commit -F - <<'EOF'
 Co-Authored-By: ...
 EOF
 ```
-커밋 전 체크: gitmoji와 type이 표와 맞는가 → 헤더 100자 이하 → 마침표 없음 → 작업 ID → 꼬리말.
+커밋 전 체크: gitmoji와 type이 표와 맞는가 → 헤더 100자 이하 → 마침표 없음 → 이슈 번호 → 꼬리말.
 
 ## 6. 훅 설치
 - `./gradlew` 빌드(compileJava) 시 `git config core.hooksPath .githooks`가 자동 실행된다.

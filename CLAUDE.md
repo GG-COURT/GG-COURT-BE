@@ -94,7 +94,20 @@ src/main/resources/
 - 상세 코드 컨벤션은 `.claude/skills/gg-implement/SKILL.md`, 테스트는 `gg-test`, 검증 기준은 `gg-verify`에 있다.
 
 ## Git
-- 브랜치: `main`, `develop`, 작업 브랜치 `feat/T-00X-설명`, `fix/...`
-- 커밋: **커밋 메시지를 쓰기 전에 매번 `.claude/skills/gg-commit/SKILL.md`를 읽고 따른다.** 형식은 `<gitmoji> <type>: <subject>`(프론트와 같은 gitmoji 컨벤션, 본문 한글), 끝에 작업 ID `(T-00X)`. 예: `✨ feat: 판결 등록 API 추가 (T-004)`.
+
+### 작업 흐름 (이슈 기반)
+원격: `origin` = https://github.com/GG-COURT/GG-COURT-BE
+
+1. **이슈 선택**: 사용자가 작업할 GitHub 이슈를 정한다. 메인은 이슈 내용으로 작업 명세를 쓴다(이슈 번호를 명세에 적는다).
+2. **원격과 상태 맞추기**: `git fetch origin` → `git switch develop` → `git pull --ff-only origin develop`. 로컬에 커밋하지 않은 변경이 있으면 먼저 사용자에게 알린다.
+3. **로컬 브랜치 생성**: develop에서 `{type}/{이슈번호}-{짧은-영문-설명}`. 예: `feat/12-verdict-create`, `fix/15-duplicate-vote`.
+4. **구현과 커밋**: 위 에이전트 작업 흐름을 따른다. 커밋 메시지는 `gg-commit` 스킬대로, subject 끝에 `(#이슈번호)`. 예: `✨ feat: 판결 등록 API 추가 (#12)`.
+5. **PR**: 사용자 확인 후 브랜치를 push하고 **develop 대상** PR을 만든다. 본문에 `Closes #이슈번호`.
+6. **머지**: **Claude는 머지하지 않는다.** 사용자와 팀원이 리뷰한 뒤 직접 머지한다. 리뷰 반영은 같은 브랜치에 커밋을 추가한다.
+
+### 규칙
+- `main`, `develop`에 직접 커밋·push하지 않는다. 항상 작업 브랜치 → PR.
+- 커밋: **커밋 메시지를 쓰기 전에 매번 `.claude/skills/gg-commit/SKILL.md`를 읽고 따른다.** 형식은 `<gitmoji> <type>: <subject>`(프론트와 같은 gitmoji 컨벤션, 본문 한글).
 - `.githooks/commit-msg` 훅이 형식을 검사해 틀리면 커밋을 거부한다. `--no-verify`로 우회하지 않는다.
-- 커밋은 verifier PASS 후 메인이 한다. **push와 PR 생성은 사용자 확인 후.**
+- 커밋은 verifier PASS 후 메인이 한다. **push와 PR 생성은 사용자 확인 후.** 머지·브랜치 삭제·force push는 하지 않는다.
+- 이슈가 없는 작업(설정·문서 수정 등)은 사용자에게 이슈를 만들지 묻거나, 지시에 따라 이슈 번호 없이 같은 흐름(브랜치 → PR)으로 진행한다.
