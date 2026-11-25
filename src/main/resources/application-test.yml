@@ -1,0 +1,10 @@
+# 테스트용. DB·Redis는 Testcontainers의 @ServiceConnection이 주입한다.
+spring:
+  docker:
+    compose:
+      enabled: false
+  jpa:
+    show-sql: false
+logging:
+  level:
+    com.ggcourt: DEBUG
