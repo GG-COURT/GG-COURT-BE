@@ -1,7 +1,7 @@
 # PROGRESS — 세션 인수인계 문서
 
 > **새 세션은 이 문서부터 읽는다.** 작업이 끝날 때마다 메인 에이전트가 갱신한다.
-> 마지막 갱신: 2026-11-25 · 테스트 실행 규칙 변경, Java 24 전환
+> 마지막 갱신: 2026-11-25 · 로컬 MySQL 포트 3307로 변경
 
 ## 1. 현재 상태 요약
 - T-001 환경 설정 완료 (verifier PASS). 빈 Spring Boot 4.2.0 프로젝트가 MySQL·Redis와 함께 뜨고 테스트 8개가 통과한다.
@@ -9,7 +9,7 @@
 - 다음 작업은 **T-002 공통 기반**. 명세는 다음 세션 시작 시 메인이 작성한다.
 - **테스트는 사용자가 지시할 때만 실행한다** (CLAUDE.md "테스트 실행 규칙", gg-test 0절). 에이전트는 `./gradlew build -x test`까지만 돌린다.
 - Java 24로 전환했다(toolchain·CI·문서). `build -x test`만 확인, 테스트는 Java 24에서 아직 미실행.
-- 사용자 확인 필요: 로컬 MySQL 포트(6절), Java 24 전환 후 테스트 실행 여부.
+- 사용자 확인 필요: Java 24 전환 후 테스트 실행 여부.
 
 ## 2. 진행 중 작업
 없음
@@ -67,7 +67,7 @@
 | API 경로·응답·에러 형식 | `gg-implement` 스킬 4절 (프론트와 확인 필요) |
 | Git | develop + 기능 브랜치, Conventional Commits |
 | Java toolchain (2026-11-25) | settings.gradle에 foojay-resolver 1.0.0 (로컬에 JDK 24가 없는 환경에서 자동 다운로드). 이 Mac은 SDKMAN의 Temurin 24.0.2 사용 |
-| 로컬 포트 (2026-11-25) | `.env` 기본값 MYSQL_PORT=3306, 앱 8080. 이 Mac은 3306·8080이 다른 프로세스에 점유되어 있어 `.env`의 MYSQL_PORT 변경(예: 3307)과 `--server.port` 지정 필요 |
+| 로컬 포트 (2026-11-25) | `.env.example` 기본값은 MYSQL_PORT=3306 유지. 이 Mac은 Oracle 설치본 MySQL 8.4.11(LaunchDaemon `com.oracle.oss.mysql.mysqld`)이 3306을 쓰므로 사용자가 `.env`를 MYSQL_PORT=3307로 변경. 앱은 8080 그대로 |
 | docker compose 연동 (2026-11-25) | local은 `lifecycle-management: start-only`(앱 종료 시 컨테이너 유지), test는 compose 비활성(Testcontainers 사용) |
 
 ### 미정
@@ -87,6 +87,7 @@
 - Java 24는 비LTS이고 2025-09 이후 보안 업데이트가 없다(24.0.2가 마지막). AWS 운영 배포 전에 Java 25 LTS로 올릴지 다시 검토한다.
 
 ## 8. 세션 로그 (최신이 위)
+- **2026-11-25 · 로컬 포트**: 3306 점유 원인은 Mac에 직접 설치된 MySQL 8.4.11 → 사용자가 `.env` MYSQL_PORT=3307로 변경 / compose 재기동, local 프로필 기동 확인(health UP, swagger 200, JDBC 127.0.0.1:3307) / 앱은 종료, compose 컨테이너는 실행 중.
 - **2026-11-25 · 설정 변경**: 테스트 자동 실행 금지 규칙을 CLAUDE.md·스킬 3개·에이전트 3개에 반영 / Java 24 전환, `build -x test` 통과(class major 68) / 테스트는 미실행 / 사용자에게: Java 24에서 테스트 실행 권장.
 - **2026-11-25 · T-001**: git 초기화(main/develop/feat 브랜치), implementer→tester→verifier 1회 만에 PASS, 커밋 57897bb / 다음은 T-002 명세 작성 / 사용자에게: JDK 21.0.13 설치, 로컬 MySQL 포트 충돌, push·develop 병합 여부.
 - **2026-11-25 · 초기 세팅**: CLAUDE.md, 서브에이전트 3개(implementer·tester·verifier)와 스킬, 이 문서를 만들었다. 다음 세션은 T-001부터 시작한다.
