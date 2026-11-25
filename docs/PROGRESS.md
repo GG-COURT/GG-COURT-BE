@@ -22,7 +22,7 @@
 ## 4. 완료된 작업 (최신이 위)
 | 작업 ID | 작업 | 완료일 | 커밋 | 비고 |
 |---|---|---|---|---|
-| T-001 | 환경 설정 (Boot 4.2.0, compose, 프로필, Flyway V1, Testcontainers, CI) | 2026-11-25 | 57897bb | 테스트 8개. CI는 원격 저장소가 없어 실제 실행 미확인 |
+| T-001 | 환경 설정 (Boot 4.2.0, compose, 프로필, Flyway V1, Testcontainers, CI) | 2026-11-25 | 22168b0 | 테스트 8개. CI는 원격 저장소가 없어 실제 실행 미확인 |
 
 ## 5. 백로그 (MVP)
 | 작업 ID | 작업 | 선행 | 메모 |
@@ -88,10 +88,10 @@
 - Java 24는 비LTS이고 2025-09 이후 보안 업데이트가 없다(24.0.2가 마지막). AWS 운영 배포 전에 Java 25 LTS로 올릴지 다시 검토한다.
 
 ## 8. 세션 로그 (최신이 위)
-- **2026-11-25 · 커밋 컨벤션**: FE 저장소의 commitlint-config-gitmoji 규칙을 확인해 백엔드에 perl 기반 commit-msg 훅, Gradle 자동 설치 태스크, gg-commit 스킬, CLAUDE.md 규칙 추가 / 훅 샘플 16건 확인 / 이전 커밋 5개는 이 형식 이전이라 형식이 다름.
+- **2026-11-25 · 커밋 컨벤션**: FE 저장소의 commitlint-config-gitmoji 규칙을 확인해 백엔드에 perl 기반 commit-msg 훅, Gradle 자동 설치 태스크, gg-commit 스킬, CLAUDE.md 규칙 추가 / 훅 샘플 16건 확인 / 이전 커밋 5개도 사용자 요청으로 gitmoji 형식으로 메시지를 다시 씀(filter-branch, 내용 변경 없음, push 전이라 영향 없음).
 - **2026-11-25 · 로컬 포트**: 3306 점유 원인은 Mac에 직접 설치된 MySQL 8.4.11 → 사용자가 `.env` MYSQL_PORT=3307로 변경 / compose 재기동, local 프로필 기동 확인(health UP, swagger 200, JDBC 127.0.0.1:3307) / 앱은 종료, compose 컨테이너는 실행 중.
 - **2026-11-25 · 설정 변경**: 테스트 자동 실행 금지 규칙을 CLAUDE.md·스킬 3개·에이전트 3개에 반영 / Java 24 전환, `build -x test` 통과(class major 68) / 테스트는 미실행 / 사용자에게: Java 24에서 테스트 실행 권장.
-- **2026-11-25 · T-001**: git 초기화(main/develop/feat 브랜치), implementer→tester→verifier 1회 만에 PASS, 커밋 57897bb / 다음은 T-002 명세 작성 / 사용자에게: JDK 21.0.13 설치, 로컬 MySQL 포트 충돌, push·develop 병합 여부.
+- **2026-11-25 · T-001**: git 초기화(main/develop/feat 브랜치), implementer→tester→verifier 1회 만에 PASS, 커밋 22168b0 / 다음은 T-002 명세 작성 / 사용자에게: JDK 21.0.13 설치, 로컬 MySQL 포트 충돌, push·develop 병합 여부.
 - **2026-11-25 · 초기 세팅**: CLAUDE.md, 서브에이전트 3개(implementer·tester·verifier)와 스킬, 이 문서를 만들었다. 다음 세션은 T-001부터 시작한다.
 
 <!-- 세션 로그 작성 형식
